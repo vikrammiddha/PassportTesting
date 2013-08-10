@@ -7,10 +7,12 @@ package com.src.Utils;
 import Common.src.com.Config.AppConfig;
 import Common.src.com.SFDC.PartnerSession;
 import com.sforce.soap.partner.PartnerConnection;
+import com.src.PassportTest;
 import com.src.bean.InputFileRow;
 import com.src.bean.User;
 import java.util.ArrayList;
 import java.util.HashMap;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -20,6 +22,7 @@ public class Utils {
     
     private FileReaderWriter fileReader;
     private AppConfig appConfig = null;
+    private static Logger LOGGER = Logger.getLogger(Utils.class);
     
     public Utils(AppConfig appConfig){
         fileReader = new FileReaderWriter();
@@ -200,6 +203,181 @@ public class Utils {
       }
       
       fileReader.writeToExcel(appConfig.getOrgUsersFile(), printRows);
+    }
+    
+    public void clearTestData(PartnerConnection connection){
+        
+        ArrayList<String> fieldList = new ArrayList<String>();
+        PartnerSession sfdcSession = new PartnerSession(appConfig);
+        fieldList.add("Id");
+        String query = " FROM FeedItem ";
+        ArrayList<HashMap<String, String>>  res = sfdcSession.executeQuery(fieldList, query, connection);
+        
+        ArrayList<String> delIdList = new ArrayList<String>();
+        for(HashMap<String, String> hm : res){
+            delIdList.add(hm.get("ID"));
+        }
+        
+        if(delIdList.size() > 0)
+            sfdcSession.deleteSFDCRecords(delIdList.toArray(new String[delIdList.size()]), connection);
+        
+        LOGGER.info("Deleted " + delIdList.size() + " Feed Items");
+        
+        // Recyclebin Feeditems
+        
+        query = " from FeedItem where isDeleted=true ";
+        
+        res = sfdcSession.executeQuery(fieldList, query, connection);
+        
+        delIdList.clear();
+        
+        for(HashMap<String, String> hm : res){
+            delIdList.add(hm.get("ID"));
+        }
+        
+        if(delIdList.size() > 0)
+            sfdcSession.emptyRecycleBin(delIdList.toArray(new String[delIdList.size()]), connection);
+        
+        LOGGER.info("Deleted " + delIdList.size() + " Feed Items from Recycle Bin");
+        
+        // Delete Collaboration groups
+        
+        query = " from CollaborationGroup ";
+        
+        res = sfdcSession.executeQuery(fieldList, query, connection);
+        
+        delIdList.clear();
+        
+        for(HashMap<String, String> hm : res){
+            delIdList.add(hm.get("ID"));
+        }
+        
+        if(delIdList.size() > 0)
+            sfdcSession.deleteSFDCRecords(delIdList.toArray(new String[delIdList.size()]), connection);
+        
+        LOGGER.info("Deleted " + delIdList.size() + " Collaboration Groups");
+        
+        // Recyclebin Colaboration groups
+        
+        query = " from CollaborationGroup where isDeleted=true ";
+        
+        res = sfdcSession.executeQuery(fieldList, query, connection);
+        
+        delIdList.clear();
+        
+        for(HashMap<String, String> hm : res){
+            delIdList.add(hm.get("ID"));
+        }
+        
+        if(delIdList.size() > 0)
+            sfdcSession.emptyRecycleBin(delIdList.toArray(new String[delIdList.size()]), connection);
+        
+        LOGGER.info("Deleted " + delIdList.size() + " Collaboration groups from Recycle Bin");
+        
+        
+        // Delete Mapping
+        
+        query = " from PassportDev2__Mapping__c where PassportDev2__Type__c!='User' ";
+        
+        res = sfdcSession.executeQuery(fieldList, query, connection);
+        
+        delIdList.clear();
+        
+        for(HashMap<String, String> hm : res){
+            delIdList.add(hm.get("ID"));
+        }
+        
+        if(delIdList.size() > 0)
+            sfdcSession.deleteSFDCRecords(delIdList.toArray(new String[delIdList.size()]), connection);
+        
+        LOGGER.info("Deleted " + delIdList.size() + " Mappings");
+        
+        // Recyclebin Mapping
+        
+        query = " from PassportDev2__Mapping__c where isDeleted=true ";
+        
+        res = sfdcSession.executeQuery(fieldList, query, connection);
+        
+        delIdList.clear();
+        
+        for(HashMap<String, String> hm : res){
+            delIdList.add(hm.get("ID"));
+        }
+        
+        if(delIdList.size() > 0)
+            sfdcSession.emptyRecycleBin(delIdList.toArray(new String[delIdList.size()]), connection);
+        
+        LOGGER.info("Deleted " + delIdList.size() + " Mappings from Recycle Bin");
+        
+        // Delete Queue
+        
+        query = " from PassportDev2__Queue__c ";
+        
+        res = sfdcSession.executeQuery(fieldList, query, connection);
+        
+        delIdList.clear();
+        
+        for(HashMap<String, String> hm : res){
+            delIdList.add(hm.get("ID"));
+        }
+        
+        if(delIdList.size() > 0)
+            sfdcSession.deleteSFDCRecords(delIdList.toArray(new String[delIdList.size()]), connection);
+        
+        LOGGER.info("Deleted " + delIdList.size() + " Queues");
+        
+        // Recyclebin Queue 
+        
+        query = " from PassportDev2__Queue__c where isDeleted=true ";
+        
+        res = sfdcSession.executeQuery(fieldList, query, connection);
+        
+        delIdList.clear();
+        
+        for(HashMap<String, String> hm : res){
+            delIdList.add(hm.get("ID"));
+        }
+        
+        if(delIdList.size() > 0)
+            sfdcSession.emptyRecycleBin(delIdList.toArray(new String[delIdList.size()]), connection);
+        
+        LOGGER.info("Deleted " + delIdList.size() + " Queues from Recycle Bin");
+        
+        // Delete Logs
+        
+        query = " from PassportDev2__Log__c ";
+        
+        res = sfdcSession.executeQuery(fieldList, query, connection);
+        
+        delIdList.clear();
+        
+        for(HashMap<String, String> hm : res){
+            delIdList.add(hm.get("ID"));
+        }
+        
+        if(delIdList.size() > 0)
+            sfdcSession.deleteSFDCRecords(delIdList.toArray(new String[delIdList.size()]), connection);
+        
+        LOGGER.info("Deleted " + delIdList.size() + " Logs");
+        
+        // Recyclebin Logs
+        
+        query = " from PassportDev2__Log__c where isDeleted=true ";
+        
+        res = sfdcSession.executeQuery(fieldList, query, connection);
+        
+        delIdList.clear();
+        
+        for(HashMap<String, String> hm : res){
+            delIdList.add(hm.get("ID"));
+        }
+        
+        if(delIdList.size() > 0)
+            sfdcSession.emptyRecycleBin(delIdList.toArray(new String[delIdList.size()]), connection);
+        
+        LOGGER.info("Deleted " + delIdList.size() + " Logs from Recycle Bin");
+        
+        
     }
     
 }

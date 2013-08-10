@@ -22,6 +22,15 @@ public final class AppConfig {
     private String sfdcUsername;
     private String sfdcPassword;
     private String orgUsersFile;
+    private Boolean clearDataByDefault;
+
+    public Boolean getClearDataByDefault() {
+        return clearDataByDefault;
+    }
+
+    public void setClearDataByDefault(Boolean clearDataByDefault) {
+        this.clearDataByDefault = clearDataByDefault;
+    }
 
     public String getOrgUsersFile() {
         return orgUsersFile;

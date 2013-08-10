@@ -21,16 +21,16 @@ import java.util.Scanner;
 import org.apache.log4j.Logger;
 
 
-public class ReportsHelper {  
+public class PassportTest {  
   
   private static AppConfig appConfig = null;
   private Utils utils = null;
   private PartnerSession pSession = null;
   private HashMap<String,PartnerConnection> sessionMap;
-  private static Logger LOGGER = Logger.getLogger(ReportsHelper.class);
+  private static Logger LOGGER = Logger.getLogger(PassportTest.class);
   private ArrayList<InputFileRow> distinctOrgList;
   
-  public ReportsHelper(){
+  public PassportTest(){
       appConfig = Configurator.getAppConfig();
       utils = new Utils(appConfig);
       pSession = new PartnerSession(appConfig);
@@ -40,14 +40,15 @@ public class ReportsHelper {
 
   public static void main(String[] args) {      
     
-      ReportsHelper helperObj = new ReportsHelper();
+      PassportTest helperObj = new PassportTest();
       LOGGER.info("Loading Sessions for all the Orgs ....");
       helperObj.getSFDCSessions();
       LOGGER.info("Sessions Loaded into the memory ...");
       
       System.out.println("Enter the number and press Enter \n");
       System.out.println("1 : Fetch Replica Users \n");
-      System.out.println("2 : Run Test Cases \n");
+      System.out.println("2 : Clear all test data from all Orgs \n");
+      System.out.println("3 : Run Test Cases \n");
       Scanner in = new Scanner(System.in);
       int choice = -1;
       
@@ -63,12 +64,30 @@ public class ReportsHelper {
           case 1: LOGGER.info("Starting Fetch Replica users process ...");
                   helperObj.populateReplicaUsers();  
                   break;
-          case 2: LOGGER.info("Running Test cases ...");
+          case 2: LOGGER.info("Clearing all the data ...");
+                  helperObj.clearTestData();
                   break;
           default: LOGGER.info("Invalid input ...");
                   break;  
       }      
     
+  }
+  
+  private void clearTestData(){
+      
+      for(InputFileRow row : distinctOrgList){
+          
+          LOGGER.info("Clearing data for Org :: " + row.getOrgName() + " ......");
+          try{
+            utils.clearTestData(sessionMap.get(row.getOrgName()));
+            LOGGER.info("Cleared data for Org :: " + row.getOrgName() + " ......");
+          }catch(Exception e){
+              LOGGER.error(" Could not clear the data  for Org :: " + row.getOrgName() + ". Cause :  " + e.getMessage());
+              e.printStackTrace();
+          }
+          
+      }
+      
   }
   
   

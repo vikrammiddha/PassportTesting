@@ -72,6 +72,7 @@ public class Configurator {
                 appConfig.setSfdcUsername(props.getProperty("sfdc.sfdcUsername"));
                 appConfig.setSfdcPassword(props.getProperty("sfdc.sfdcPassword"));
                 appConfig.setOrgUsersFile(props.getProperty("file.orgUserIdsFilePath"));
+                appConfig.setClearDataByDefault(props.getProperty("passport.clearAllDataByDefault").toUpperCase().equals("YES") ? Boolean.TRUE : Boolean.FALSE);
                 
 
 

@@ -6,6 +6,7 @@ package Common.src.com.SFDC;
 
 import Common.src.com.Config.AppConfig;
 import com.sforce.soap.partner.Connector;
+import com.sforce.soap.partner.DeleteResult;
 import com.sforce.soap.partner.PartnerConnection;
 import com.sforce.soap.partner.QueryResult;
 import com.sforce.soap.partner.sobject.SObject;
@@ -14,6 +15,8 @@ import com.sforce.ws.ConnectorConfig;
 import com.src.bean.InputFileRow;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -64,6 +67,8 @@ public class PartnerSession {
         
         ArrayList<HashMap<String, String>> retMap = new ArrayList<HashMap<String, String>>();
         
+        connection.setQueryOptions(250);
+        
         try {
             String query = "SELECT ";
             Integer counter = 1;
@@ -78,10 +83,13 @@ public class PartnerSession {
             
             query += clause;
             
-            
+          boolean done = false;  
           // query for the 5 newest contacts      
           QueryResult queryResults = connection.query(query);
-          if (queryResults.getSize() > 0) {
+          
+          while (!done) {
+              
+            if (queryResults.getSize() > 0) {
               for (SObject s: queryResults.getRecords()) {
                   
                   HashMap<String,String> tempMap = new HashMap<String,String>();
@@ -97,7 +105,16 @@ public class PartnerSession {
                   
                   retMap.add(tempMap);
               }
+              
+              if (queryResults.isDone()) {
+                    done = true;
+                } else {
+                    queryResults = connection.queryMore(queryResults.getQueryLocator());
+                }
             }
+              
+          }
+         
 
         } catch (Exception e) {
           e.printStackTrace();
@@ -105,4 +122,39 @@ public class PartnerSession {
         
         return retMap;
   }
+    
+    public void deleteSFDCRecords(String[] ids, PartnerConnection connection) {
+    
+        
+    try {
+       
+      // delete the records in Salesforce.com by passing an array of Ids
+      DeleteResult[] deleteResults = connection.delete(ids);
+      
+      // check the results for any errors
+      for (int i=0; i< deleteResults.length; i++) {
+        if (deleteResults[i].isSuccess()) {
+          //System.out.println(i+". Successfully deleted record - Id: " + deleteResults[i].getId());
+        } else {
+            com.sforce.soap.partner.Error[] errors = deleteResults[i].getErrors();
+          for (int j=0; j< errors.length; j++) {
+            System.out.println("ERROR deleting record: " + errors[j].getMessage());
+          }
+        }    
+      }
+      
+    } catch (Exception e) {
+      e.printStackTrace();
+    } 
+   
+    
+  }
+     
+    public void emptyRecycleBin(String[] ids, PartnerConnection connection){
+        try {
+            connection.emptyRecycleBin(ids);
+        } catch (ConnectionException ex) {
+            Logger.getLogger(PartnerSession.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 }
